@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Century Card Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 3em;
+            font-family: 'Georgia', serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .setup-section, .game-section {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            border: 2px solid #bdc3c7;
+        }
+
+        /* Score History Table */
+        .score-table-container {
+            margin-bottom: 25px;
+            overflow-x: auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .score-table th {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .score-table th:first-child {
+            border-top-left-radius: 12px;
+            text-align: left;
+            padding-left: 15px;
+        }
+
+        .score-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        .score-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .score-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            padding-left: 15px;
+            color: #2c3e50;
+        }
+
+        .score-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .score-table .total-row {
+            background: #fef9e7;
+            font-weight: bold;
+        }
+
+        .score-table .total-row td {
+            border-top: 2px solid #3498db;
+            color: #2c3e50;
+        }
+
+        .eliminated-score {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* Player Cards */
+        .player-card {
+            background: linear-gradient(135deg, #fff5eb 0%, #ffe4d1 100%);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .player-card.eliminated {
+            background: linear-gradient(135deg, #ffcccc 0%, #ff9999 100%);
+            opacity: 0.8;
+        }
+
+        .player-card.winner {
+            background: linear-gradient(135deg, #d5f4e6 0%, #a8e6cf 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .player-name.eliminated {
+            color: #721c24;
+        }
+
+        .player-score {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #3498db;
+            background: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .player-card.eliminated .player-score {
+            color: #e74c3c;
+        }
+
+        .player-card.winner .player-score {
+            color: #27ae60;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge-eliminated {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .badge-winner {
+            background: #27ae60;
+            color: white;
+        }
+
+        /* Check Section */
+        .check-section {
+            background: #e8f4f8;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .check-section.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .check-section.disabled::after {
+            content: '🏆 Game Over - Winner Declared!';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(39, 174, 96, 0.95);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .check-title {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .checker-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .checker-btn {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #3498db;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .checker-btn:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .checker-btn.selected {
+            background: #3498db;
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .score-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .score-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .score-input-group label {
+            font-size: 0.85em;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+
+        .score-input-group input {
+            padding: 10px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .result-message {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            color: #856404;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .result-message.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .result-message.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .score-table {
+                font-size: 0.8em;
+            }
+
+            .checker-btn {
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Century</h1>
+        <p class="subtitle">First to 100 points loses!</p>
+        <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center; font-size: 0.9em; color: #2c3e50;">
+            <strong>Card Values:</strong> A = 1 point | J = 0 point | Q & K = 20 points | Others = face value
+        </div>
+
+        <!-- Setup Section -->
+        <div id="setupSection" class="setup-section">
+            <div class="input-group">
+                <label for="playerName">Enter Player Names:</label>
+                <input type="text" id="playerName" placeholder="Enter player name and press Add">
+            </div>
+            <button onclick="addPlayer()" class="btn-success">➕ Add Player</button>
+            
+            <div id="playerListSetup" class="player-list" style="margin-top: 20px;"></div>
+            
+            <button onclick="startGame()" class="btn-success" style="margin-top: 20px; width: 100%;">🎮 Start Game</button>
+        </div>
+
+        <!-- Game Section -->
+        <div id="gameSection" class="game-section hidden">
+            <div class="check-section">
+                <div class="check-title">⚡ Who called CHECK?</div>
+                
+                <div class="checker-buttons" id="checkerButtons"></div>
+                
+                <div class="score-inputs" id="scoreInputs"></div>
+                
+                <button onclick="calculateCheck()" class="btn-success" style="width: 100%;">Calculate Penalties</button>
+                
+                <div id="resultMessage"></div>
+            </div>
+
+            <div id="playerCards"></div>
+
+            <!-- Score History Table -->
+            <div class="score-table-container" id="scoreTableContainer">
+                <table class="score-table" id="scoreTable">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="game-controls">
+                <button onclick="resetGame()" class="btn-danger">🔄 Reset Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        let gameData = {};
+        let selectedChecker = null;
+        let roundHistory = [];
+
+        function addPlayer() {
+            const input = document.getElementById('playerName');
+            const name = input.value.trim();
+            
+            if (name === '') {
+                alert('Please enter a player name!');
+                return;
+            }
+            
+            if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                alert('Player already exists!');
+                return;
+            }
+            
+            players.push({ name: name, score: 0, eliminated: false });
+            input.value = '';
+            updatePlayerListSetup();
+        }
+
+        function updatePlayerListSetup() {
+            const list = document.getElementById('playerListSetup');
+            list.innerHTML = '';
+            
+            players.forEach((player, index) => {
+                const div = document.createElement('div');
+                div.className = 'player-item';
+                div.innerHTML = `
+                    <span><strong>Player ${index + 1}:</strong> ${player.name}</span>
+                    <button class="remove-btn" onclick="removePlayer(${index})">Remove</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            updatePlayerListSetup();
+        }
+
+        function startGame() {
+            if (players.length < 2) {
+                alert('You need at least 2 players to start the game!');
+                return;
+            }
+            
+            gameData = {};
+            roundHistory = [];
+            players.forEach(player => {
+                gameData[player.name] = { score: 0, eliminated: false };
+            });
+            
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+            
+            updateGameDisplay();
+            updateCheckerButtons();
+            updateScoreInputs();
+            updateScoreTable();
+        }
+
+        function updateScoreTable() {
+            const tableHead = document.querySelector('#scoreTable thead tr');
+            const tableBody = document.getElementById('scoreTableBody');
+            
+            // Update header
+            tableHead.innerHTML = '<th>Player</th>';
+            roundHistory.forEach((round, index) => {
+                tableHead.innerHTML += `<th>R${index + 1}</th>`;
+            });
+            tableHead.innerHTML += '<th>Total</th>';
+            
+            // Update body
+            tableBody.innerHTML = '';
+            players.forEach(player => {
+                const row = document.createElement('tr');
+                const isEliminated = gameData[player.name].eliminated;
+                const totalScore = gameData[player.name].score;
+                
+                row.innerHTML = `<td>${player.name}</td>`;
+                
+                roundHistory.forEach(round => {
+                    const penalty = round.penalties[player.name] || 0;
+                    row.innerHTML += `<td>${penalty > 0 ? '+' + penalty : '-'}</td>`;
+                });
+                
+                row.innerHTML += `<td class="${isEliminated ? 'eliminated-score' : ''}">${totalScore}</td>`;
+                
+                if (isEliminated) {
+                    row.classList.add('total-row');
+                }
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateCheckerButtons() {
+            const container = document.getElementById('checkerButtons');
+            container.innerHTML = '';
+            
+            players.filter(p => !gameData[p.name].eliminated).forEach(player => {
+                const btn = document.createElement('button');
+                btn.className = 'checker-btn';
+                btn.textContent = player.name;
+                btn.onclick = () => selectChecker(player.name);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectChecker(name) {
+            selectedChecker = name;
+            
+            // Update button styles
+            document.querySelectorAll('.checker-btn').forEach(btn => {
+                if (btn.textContent === name) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        }
+
+        function updateGameDisplay() {
+            const container = document.getElementById('playerCards');
+            container.innerHTML = '';
+            
+            const activePlayers = players.filter(p => !gameData[p.name].eliminated);
+            const eliminatedPlayers = players.filter(p => gameData[p.name].eliminated);
+            
+            // Check for winner and disable check section
+            const checkSection = document.querySelector('.check-section');
+            if (activePlayers.length === 1) {
+                checkSection.classList.add('disabled');
+                
+                const winner = activePlayers[0];
+                const card = document.createElement('div');
+                card.className = 'player-card winner';
+                card.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name">
+                            ${winner.name}
+                            <span class="status-badge badge-winner">🏆 WINNER!</span>
+                        </div>
+                        <div class="player-score">${gameData[winner.name].score} pts</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            } else {
+                checkSection.classList.remove('disabled');
+            }
+            
+            // Show active players
+            activePlayers.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                card.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-score">${gameData[player.name].score} pts</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Show eliminated players
+            eliminatedPlayers.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-card eliminated';
+                card.innerHTML = `
+                    <div class="player-header">
+                        <div class="player-name eliminated">
+                            ${player.name}
+                            <span class="status-badge badge-eliminated">❌ ELIMINATED</span>
+                        </div>
+                        <div class="player-score">${gameData[player.name].score} pts</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateScoreInputs() {
+            const container = document.getElementById('scoreInputs');
+            container.innerHTML = '';
+            
+            players.filter(p => !gameData[p.name].eliminated).forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'score-input-group';
+                div.innerHTML = `
+                    <label>${player.name}'s Sum:</label>
+                    <input type="number" id="score_${player.name}" min="0" max="65" placeholder="0">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calculateCheck() {
+            if (!selectedChecker) {
+                alert('Please select who called CHECK!');
+                return;
+            }
+            
+            const scores = {};
+            let allScoresEntered = true;
+            
+            players.filter(p => !gameData[p.name].eliminated).forEach(player => {
+                const input = document.getElementById(`score_${player.name}`);
+                const value = parseInt(input.value);
+                
+                if (isNaN(value) || value < 0) {
+                    allScoresEntered = false;
+                } else {
+                    scores[player.name] = value;
+                }
+            });
+            
+            if (!allScoresEntered) {
+                alert('Please enter valid scores for all players!');
+                return;
+            }
+            
+            const checkerScore = scores[selectedChecker];
+            let checkerWins = true;
+            const resultMessage = document.getElementById('resultMessage');
+            const roundPenalties = {};
+            
+            // Initialize all penalties to 0
+            players.forEach(p => roundPenalties[p.name] = 0);
+            
+            // Check if checker has lowest score
+            for (let playerName in scores) {
+                if (playerName !== selectedChecker && scores[playerName] <= checkerScore) {
+                    checkerWins = false;
+                    break;
+                }
+            }
+            
+            if (checkerWins) {
+                // Checker wins - penalize all others
+                let message = `✅ ${selectedChecker} wins the CHECK!<br><br>`;
+                for (let playerName in scores) {
+                    if (playerName !== selectedChecker) {
+                        const penalty = scores[playerName];
+                        gameData[playerName].score += penalty;
+                        roundPenalties[playerName] = penalty;
+                        message += `${playerName}: +${penalty} points (Total: ${gameData[playerName].score})<br>`;
+                        
+                        if (gameData[playerName].score >= 100) {
+                            gameData[playerName].eliminated = true;
+                            message += `<strong>🚫 ${playerName} is ELIMINATED!</strong><br>`;
+                        }
+                    }
+                }
+                resultMessage.className = 'result-message success';
+                resultMessage.innerHTML = message;
+            } else {
+                // Checker loses - penalize 50 points
+                gameData[selectedChecker].score += 50;
+                roundPenalties[selectedChecker] = 50;
+                resultMessage.className = 'result-message error';
+                resultMessage.innerHTML = `❌ ${selectedChecker} loses the CHECK!<br><br>${selectedChecker}: +50 penalty points (Total: ${gameData[selectedChecker].score})`;
+                
+                if (gameData[selectedChecker].score >= 100) {
+                    gameData[selectedChecker].eliminated = true;
+                    resultMessage.innerHTML += `<br><strong>🚫 ${selectedChecker} is ELIMINATED!</strong>`;
+                }
+            }
+            
+            // Add round to history
+            roundHistory.push({
+                checker: selectedChecker,
+                penalties: roundPenalties
+            });
+            
+            updateGameDisplay();
+            updateCheckerButtons();
+            updateScoreInputs();
+            updateScoreTable();
+            
+            // Clear selection and inputs
+            selectedChecker = null;
+            players.forEach(player => {
+                const input = document.getElementById(`score_${player.name}`);
+                if (input) input.value = '';
+            });
+        }
+
+        function resetGame() {
+            if (confirm('Reset game and go back to setup? All scores will be cleared but player names will be kept.')) {
+                // Keep player names but reset scores
+                gameData = {};
+                roundHistory = [];
+                selectedChecker = null;
+                
+                players.forEach(player => {
+                    player.score = 0;
+                    player.eliminated = false;
+                    gameData[player.name] = { score: 0, eliminated: false };
+                });
+                
+                document.getElementById('setupSection').classList.remove('hidden');
+                document.getElementById('gameSection').classList.add('hidden');
+                document.getElementById('resultMessage').innerHTML = '';
+                updatePlayerListSetup();
+            }
+        }
+
+        // Allow Enter key to add player
+        document.getElementById('playerName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
+    </script>
+</body>
+</html>
